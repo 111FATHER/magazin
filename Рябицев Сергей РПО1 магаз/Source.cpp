@@ -3,6 +3,7 @@
 #include <ctime>
 #include <iomanip>
 #include <string>
+#include <unordered_set>
 
 
 // ---------------------------------------- Учетные записи ------------------------------------------------
@@ -36,6 +37,8 @@ void AddNewItem();
 void ChangeName();
 void DeleteItem();
 void ChangeUsers();
+void ShowUsers();
+void AddNewUsers();
 template<typename T> void SwapArr (T* Arr, T* Arr2, size_t SizeArr);
 // --------------------------------------------------------------------------------------------------------
 
@@ -44,6 +47,8 @@ void Start();
 bool Login();
 void ShowSuperAdminMenu();
 bool IsNumber(const std::string& str);
+bool CheckLogin(const std::string& str);
+bool CheckPass(const std::string& str);
 
 inline void Getline(std::string& str);
 inline void Err(int time = 1500);
@@ -82,19 +87,19 @@ void ChangeUsers()
 		system("cls");
 		std::cout << "1 - Добавить нового пользователя\n";
 		std::cout << "2 - Показать пользователей\n";
-		std::cout << "2 - Изменить пароль пользователя\n";
-		std::cout << "3 - Удалить пользователя\n";
+		std::cout << "3 - Изменить пароль пользователя\n";
+		std::cout << "4 - Удалить пользователя\n";
 		std::cout << "0 - Выйти из редактора\n";
 		std::cout << "Ввод - ";
 		Getline(choose);
 
 		if (choose == "1")
 		{
-			
+			AddNewUsers();
 		}
 		else if (choose == "2" && userSize > 1)
 		{
-			
+			ShowUsers();
 		}
 		else if (choose == "3" && userSize > 1)
 		{
@@ -120,27 +125,142 @@ void ChangeUsers()
 	}
 }
 
-bool IsNumber(const std::string& str)
+void ShowUsers()
 {
-	if (str.size() <= 0 || str.size() >= 10)
+	system("cls");
+	std::cout << "\t" << std::left << std::setw(10) << "Логин\t\t" << "Пароль\t\t\t" << "Роль\n";
+	for (size_t i = 1; i < userSize; i++)
 	{
-		std::cout << "Некорректный ввод\n";
-		std::cout << "Ошибка длины числа. От 1 до 9 цифр включительно\n\n";
-		Sleep(1500);
-		return false;
-
+		std::cout << i << "\t" << std::left << std::setw(8) << loginArr[i]<< "\t\t" << passArr[i] << "\t\t\t" << statusArr[i] << "\n";
 	}
-	for (size_t i = 0; i < str.size(); i++)
+	system("pause");
+}
+
+void AddNewUsers()
+{
+	std::string newLogin, newPass, newRole, choose;
+	bool exit;
+	while (true)
 	{
-		if (!std::isdigit(str[i]))
+		exit = true;
+		while (true)
 		{
-			std::cout << "Некорректный ввод\n";
-			std::cout << "Введенные данные не являются числом\n\n";
-			Sleep(1500);
-			return false;
+			system("cls");
+			std::cout << "\tСоздание нового пользователя!\n\n";
+			std::cout << "Введите логин нового пользователя или \"exit\" для выхода - ";
+			Getline(newLogin);
+			if (newLogin == "exit")
+			{
+				std::cout << "Создание нового пользователя прервано!\n\n";
+				Sleep(1500);
+				exit = false;
+				break;
+			}
+			if (CheckLogin(newLogin))
+			{
+				break;
+			}
+		}
+
+		while (exit)
+		{
+			system("cls");
+			std::cout << "\tСоздание пароля для нового пользователя!\n\n";
+			std::cout << "Введите пароль для нового пользователя или \"exit\" для выхода - ";
+			Getline(newPass);
+			if (newPass == "exit")
+			{
+				std::cout << "Создание нового пользователя прервано!\n\n";
+				Sleep(1500);
+				exit = false;
+				break;
+			}
+			if (CheckPass(newPass))
+			{
+				break;
+			}
+		}
+		
+		while (exit)
+		{
+			system("cls");
+			std::cout << "\tСоздание нового пользователя!\n\n";
+			std::cout << "Введите роль нового пользователя или \"exit\" для выхода - ";
+			std::cout << "1 - Администратор\n2 - Сотрудник\nВвод - ";
+			Getline(choose);
+			if (choose == "exit")
+			{
+				std::cout << "Создание нового пользователя прервано!\n\n";
+				Sleep(1500);
+				exit = false;
+				break;
+			}
+			if (choose == "1")
+			{
+				newRole = userStatus[1];
+			}
+			else if (choose == "2")
+			{
+				newRole = userStatus[2];
+				break;
+			}
+			else
+			{
+				Err();
+			}
+		}
+
+		while (exit)
+		{
+			std::cout << "Пользователь - " << newLogin << "\n";
+			std::cout << "Пароль - " << newPass << "\n";
+			std::cout << "Роль - " << newRole << "\n\n";
+			std::cout << "Подтвердить?\n1 - Да\n2 - Нет\nВвод - ";
+			Getline(choose);
+
+			if (choose == "1")
+			{
+				userSize++;
+				std::string* loginArrTemp = new std::string[userSize];
+				std::string* passArrTemp = new std::string[userSize];
+				std::string* statusArrTemp = new std::string[userSize];
+
+				SwapArr(loginArrTemp, loginArr, userSize - 1);
+				SwapArr(passArrTemp, passArr, userSize - 1);
+				SwapArr(statusArrTemp, statusArr, userSize - 1);
+
+				loginArrTemp[userSize - 1] = newLogin;
+				passArrTemp[userSize - 1] = newPass;
+				statusArrTemp[userSize - 1] = newRole;
+
+				std::swap(loginArr, loginArrTemp);
+				std::swap(passArr, passArrTemp);
+				std::swap(statusArr, statusArrTemp);
+
+				delete[] loginArrTemp, passArrTemp, statusArrTemp;
+				std::cout << "Идет подготовка... ";
+				Sleep(2000);
+				std::cout << "Пользователь успешно добавлен!\n\n";
+				Sleep(1500);
+				exit = false;
+				break;
+			}
+			else if (choose == "2")
+			{
+				std::cout << "Отмена\n";
+				Sleep(1500);
+			}
+			else
+			{
+				Err();
+			}
+		}
+		
+		if (exit == false)
+		{
+			break;
 		}
 	}
-	return true;
 }
 
 void CreateStorage()
@@ -888,6 +1008,101 @@ void ShowSuperAdminMenu()
 			Err();
 		}
 	}
+}
+
+bool IsNumber(const std::string& str)
+{
+	if (str.size() <= 0 || str.size() >= 10)
+	{
+		std::cout << "Некорректный ввод\n";
+		std::cout << "Ошибка длины числа. От 1 до 9 цифр включительно\n\n";
+		Sleep(1500);
+		return false;
+
+	}
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (!std::isdigit(str[i]))
+		{
+			std::cout << "Некорректный ввод\n";
+			std::cout << "Введенные данные не являются числом\n\n";
+			Sleep(1500);
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CheckLogin(const std::string& str)
+{
+	if (str.size() < 5 || str.size() >= 20) 
+	{
+		std::cout << "Недопустимая длина логина. От 5 до 64\n";
+		Sleep(1500);
+		return false;
+	}
+	std::unordered_set<char> specialSymbols;
+	for (char i = 'A'; i <= 'Z'; i++)
+	{
+		specialSymbols.insert(i);
+	}
+	for (char i = 'a'; i <= 'z'; i++)
+	{
+		specialSymbols.insert(i);
+	}
+	for (char symb : str)
+	{
+		if (!specialSymbols.count(symb))
+		{
+			std::cout << "Некорректные символы в логине\n\n";
+			Sleep(1500);
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CheckPass(const std::string& str)
+{
+	if (str.size() < 5 || str.size() > 64)
+	{
+		std::cout << "Недопустимая длина пароля! От 5 до 64\n\n";
+		Sleep(1500);
+		return false;
+	}
+	std::unordered_set<char> specialSymbols;
+	std::unordered_set<char> passSymbols{'!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+', '/', '?', '|', '\\', '\"',
+		'\'', ',', '.', '<', '>', '~', '`', ':', ';', '{', '}', '[', ']'};
+	int symbolsCount = 0, maxSymbolsCount = 3;
+	for (char i = '!'; i <= '~'; i++)
+	{
+		specialSymbols.insert(i);
+	}
+	for (char symb : str)
+	{
+		if (!specialSymbols.count(symb))
+		{
+			std::cout << "Некорректные символы в логине\n\n";
+			Sleep(1500);
+			return false;
+		}
+	}
+	return true;
+
+	for (char symb : str)
+	{
+		if(passSymbols.count(symb))
+		{
+			symbolsCount++;
+			if (passSymbols.count(symb));
+			{
+				return true;
+			}
+		}
+	}
+	std::cout << "Требуется минимум 3 специальных символов\n\n";
+	Sleep(1500);
+	return false;
 }
 
 template<typename T> void SwapArr(T* Arr, T* Arr2, size_t SizeArr)
