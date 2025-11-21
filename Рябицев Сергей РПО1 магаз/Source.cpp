@@ -15,6 +15,12 @@ std::string* passArr = new std::string[userSize]{ "stoodin","111" };
 std::string* statusArr = new std::string[userSize]{userStatus[0], userStatus[2]};
 std::string currentStatus = statusArr[0];
 
+void ChangeUsers();
+void ShowUsers(int mode = 0);
+void AddNewUsers();
+void ChangePass();
+void DeleteUser();
+
 // --------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------- Склад ---------------------------------------------------
@@ -32,13 +38,15 @@ void ShowStorage(int mode = 0);
 void AddStorageItem();
 void RemoveStorageItem();
 void ChangePrice();
+
 void ChangeStorage();
 void AddNewItem();
 void ChangeName();
 void DeleteItem();
-void ChangeUsers();
-void ShowUsers();
-void AddNewUsers();
+
+
+
+
 template<typename T> void SwapArr (T* Arr, T* Arr2, size_t SizeArr);
 // --------------------------------------------------------------------------------------------------------
 
@@ -103,7 +111,7 @@ void ChangeUsers()
 		}
 		else if (choose == "3" && userSize > 1)
 		{
-			
+			ChangePass();
 		}
 		else if (choose == "4" && userSize > 1)
 		{
@@ -125,15 +133,31 @@ void ChangeUsers()
 	}
 }
 
-void ShowUsers()
+void ShowUsers(int mode)
 {
-	system("cls");
-	std::cout << "\t" << std::left << std::setw(10) << "Логин\t\t" << "Пароль\t\t\t" << "Роль\n";
-	for (size_t i = 1; i < userSize; i++)
+	if (mode == 0)
 	{
-		std::cout << i << "\t" << std::left << std::setw(8) << loginArr[i]<< "\t\t" << passArr[i] << "\t\t\t" << statusArr[i] << "\n";
+		system("cls");
+		std::cout << "\t" << std::left << std::setw(10) << "Логин\t\t" << "Пароль\t\t\t" << "Роль\n";
+		for (size_t i = 1; i < userSize; i++)
+		{
+			std::cout << i << "\t" << std::left << std::setw(8) << loginArr[i] << "\t\t"
+				<< passArr[i] << "\t\t\t" << statusArr[i] << "\n";
+		}
+		Sleep(1500);
 	}
-	system("pause");
+	else if (mode == 1)
+	{
+		system("cls");
+		std::cout << "\t" << std::left << std::setw(10) << "Логин\t\t" << "Пароль\t\t\t" << "Роль\n";
+		for (size_t i = 0; i < userSize; i++)
+		{
+			std::cout << i << "\t" << std::left << std::setw(8) << loginArr[i] << "\t\t"
+				<< passArr[i] << "\t\t\t" << statusArr[i] << "\n";
+		}
+		Sleep(1500);
+	}
+	
 }
 
 void AddNewUsers()
@@ -261,6 +285,145 @@ void AddNewUsers()
 			break;
 		}
 	}
+}
+
+// АДМИН НЕ МОЖЕТ МЕНЯТЬ ПАРОЛЬ ДРУГИМ АДМИНАМ <------------------------
+void ChangePass()
+{
+	std::string newPass1, newPass2, choose;
+	int userNumber = 0;
+	int isAdmin = 0;
+
+	while (true)
+	{
+		if (currentStatus == userStatus[0])
+		{
+			ShowUsers(1);
+			isAdmin = 0;
+		}
+		else
+		{
+			ShowUsers();
+			isAdmin = 1;
+		}
+
+		std::cout << "\nВыберите номер пользователя для смены пароля или \"exit\"для выхода - ";
+		Getline(choose);
+		if (choose == "exit")
+		{
+			std::cout << "Отмена изменения пароля!\n";
+			Sleep(1500);
+			break;
+		}
+		else if (IsNumber(choose))
+		{
+			userNumber = std::stoi(choose);
+			if (userNumber < isAdmin || userNumber > userSize - 1)
+			{
+				std::cout << "Пользователь с таким номером не существует!\n";
+				Sleep(1500);
+			}
+			else
+			{
+				while (true)
+				{
+					system("cls");
+					std::cout << "Введите новый пароль для пользователя" << loginArr[userNumber] << " - ";
+					Getline(newPass1);
+					std::cout << "Подтвердите пароль для пользователя" << loginArr[userNumber] << " - ";
+					Getline(newPass2);
+					if (CheckPass(newPass1) && CheckPass(newPass2) && newPass1 == newPass2)
+					{
+						passArr[userNumber] = newPass1;
+						std::cout << "Успешно\n";
+						Sleep(1500);
+						break;
+					}
+					else
+					{
+						std::cout << "Повторите попытку\n";
+						Sleep(1500);
+					}
+				}
+			}
+		}
+		else
+		{
+			Err();
+		}
+		
+	}
+}
+
+void DeleteUser()
+{
+	std::string chooseNumber, checkPass, choose;
+	int userNumber = 0, isAdmin = 0;
+
+	while (true)
+	{
+		if (currentStatus == userStatus[0])
+		{
+			if (userSize < 2)
+			{
+				std::cout << "Нет доступных пользователей для удаления!\n";
+				Sleep(1500);
+				return;
+			}
+			ShowUsers();
+			isAdmin = 1;
+		}
+		else
+		{
+			
+		}
+		std::cout << "\nВыберите номер пользователя для удаления или \"exit\"для выхода - ";
+		Getline(choose);
+		if (choose == "exit")
+		{
+			std::cout << "Отмена удаления пароля!\n";
+			Sleep(1500);
+			break;
+		}
+		else if (IsNumber(choose))
+		{
+			userNumber = std::stoi(choose);
+			if (userNumber < isAdmin || userNumber > userSize - 1)
+			{
+				std::cout << "Пользователя с таким номером не существует!\n";
+				Sleep(1500);
+			}
+			while (true)
+			{
+				system("cls");
+				std::cout << "Удаление пользователя - " << loginArr[userNumber] << "\n";
+				std::cout << "Для подтверждения введите пароль супер администратора или\"exit\"для выхода - ";
+				Getline(checkPass);
+				if (checkPass == "exit")
+				{
+					std::cout << "Отмена удаления пользователя - " << loginArr[userNumber] << "\n\n";
+					Sleep(1500);
+					break;
+				}
+				else if (checkPass == passArr[0])
+				{
+					//--------
+				}
+				else
+				{
+					std::cout << "Некорректный пароль\n";
+					Sleep(1500);
+				}
+			}
+		}
+		else
+		{
+			Err();
+		}
+	}
+
+
+
 }
 
 void CreateStorage()
@@ -1035,6 +1198,16 @@ bool IsNumber(const std::string& str)
 
 bool CheckLogin(const std::string& str)
 {
+	for (size_t i = 0; i < userSize; i++)
+	{
+		if (str == loginArr[i])
+		{
+			std::cout << "Такой пользователь существует!\n";
+			Sleep(1500);
+			return false;
+		}
+	}
+
 	if (str.size() < 5 || str.size() >= 20) 
 	{
 		std::cout << "Недопустимая длина логина. От 5 до 64\n";
