@@ -1468,6 +1468,7 @@ void ShowSuperAdminMenu()
 		{
 			ShowStorage();
 			system("pause");
+			system("cls");
 		}
 		else if (choose == "3" && storageSize > 0)
 		{
