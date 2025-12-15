@@ -44,6 +44,7 @@ void RemoveStorageItem();
 void ChangePrice();
 
 void ChangeStorage();
+void AddNewStorage();
 void AddNewItem();
 void ChangeName();
 void DeleteItem();
@@ -70,6 +71,10 @@ void Selling();
 void CheckArrAppend();
 void PrintCheck(double &totalSum);
 void StorageReturner();
+
+double Discounts(double& totalSum);
+double TotalSumDiscount(double& totalSum);
+double QuantityDiscount(double& totalSum);
 
 // --------------------------------------------------------------------------------------------------------
 
@@ -633,8 +638,7 @@ void ShowStorage(int mode)
 	}
 	else
 	{
-		std::cout << "StorageMode Error\n\n";
-		std::invalid_argument("StorageMode Error");
+		std::invalid_argument("StorageMode Error\n\n");
 	}
 }
 
@@ -853,6 +857,29 @@ void ChangeStorage()
 	}
 }
 
+void AddNewStorage()
+{
+	std::string choose;
+	while (true)
+	{
+		std::cout << "Введите 1 - чтобы начать, 2 - чтобы выйти\nВвод - ";
+		Getline(choose);
+		if (choose == "1")
+		{
+			AddNewItem();
+		}
+		else if (choose == "2")
+		{
+			ShowSuperAdminMenu();
+			break;
+		}
+		else
+		{
+			Err();
+		}
+	}
+}
+
 void AddNewItem()
 {
 	std::string newName, newPrice, newCount, choose;
@@ -864,7 +891,7 @@ void AddNewItem()
 		while (true)
 		{
 			system("cls");
-			std::cout << "\tДобавление нового товара!\n\nВведите \"exit\"для прекращения операции\n\n";
+			std::cout << "\tДобавление нового товара!\n\nВведите \"exit\" для прекращения операции\n\n";
 			std::cout << "Введите название нового товара - ";
 			Getline(newName);
 			if (newName == "exit")
@@ -1167,6 +1194,19 @@ void Selling()
 			}
 			system("cls");
 			PrintCheck(totalSum);
+
+			double originalSum = totalSum;
+			totalSum = Discounts(totalSum);
+
+			if (totalSum < originalSum) 
+			{
+				std::cout << "\n----------------------------------\n";
+				std::cout << "Сумма до скидок: " << originalSum << " руб.\n";
+				std::cout << "Сумма после скидок: " << totalSum << " руб.\n";
+				std::cout << "Экономия: " << (originalSum - totalSum) << " руб.\n";
+				std::cout << "------------------------------------\n";
+			}
+
 			std::cout << "\nПодтвердите покупку?\n1 - Да\n2 - Добавить ещё товар\n3 - Отмена\nВвод - ";
 			Getline(choose);
 			if (choose == "1")
@@ -1332,12 +1372,12 @@ void Selling()
 		totalPriceArrCheck[index] = count * priceArr[id];
 		countArr[id] -= count;
 		totalSum += totalPriceArrCheck[index];
-	
+
 
 		std::cout << "\nТовар добавлен в чек\n\n";
 		isFirst = true;
 		Sleep(1000);
-	}	
+	}
 
 
 
@@ -1411,6 +1451,53 @@ void StorageReturner()
 
 }
 
+// скидки
+double Discounts(double& totalSum) 
+{
+	double discountedSum = totalSum;
+	discountedSum = TotalSumDiscount(discountedSum);
+	discountedSum = QuantityDiscount(discountedSum);
+
+	if (discountedSum < 0) 
+	{
+		discountedSum = 0;
+	}
+
+	return discountedSum;
+}
+
+double TotalSumDiscount(double& totalSum) 
+{
+	if (totalSum >= 75000.0) 
+	{
+		std::cout << "\nСКИДКА При сумме чека от 75000 руб. - скидка 18%!\n";
+		return totalSum * 0.82; // 18%
+	}
+
+	else if (totalSum >= 35000.0) 
+	{
+		std::cout << "\nСКИДКА При сумме чека от 35000 руб. - скидка 12%!\n";
+		return totalSum * 0.88; // 12%
+	}
+	return totalSum;
+}
+
+double QuantityDiscount(double& totalSum) 
+{
+	if (checkSize >= 4) 
+	{
+		std::cout << "\nСКИДКА За покупку 4 и более разных товаров - скидка 15%!\n";
+		return totalSum * 0.85; // 15%
+	}
+	else if (checkSize >= 2) 
+	{
+		std::cout << "\nСКИДКА За покупку 2 и более разных товаров - скидка 8%!\n";
+		return totalSum * 0.92; // 8%
+	}
+	return totalSum;
+}
+//-------------
+
 void Start()
 {
 	std::string choose;
@@ -1423,7 +1510,7 @@ void Start()
 			{
 				while (true)
 				{
-					std::cout << "Выберите склад\n1 - Готовый\n2 - создать новый\nВвод - ";
+					std::cout << "Выберите склад\n1 - Готовый\n2 - Создать новый\nВвод - ";
 					Getline(choose);
 					if (choose == "1")
 					{
@@ -1440,7 +1527,7 @@ void Start()
 					{
 						if (staticStorageCreated == false)
 						{
-							// новый с нуля
+							AddNewStorage();
 						}
 						system("cls");
 						ShowSuperAdminMenu();
@@ -1525,6 +1612,7 @@ bool Login()
 		}
 		Err();
 	}
+	return false;
 }
 
 bool Logout()
@@ -1549,7 +1637,7 @@ bool Logout()
 		{
 			Err();
 		}
-
+		return false;
 	}
 }
 
